@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<title>Mission Log</title>
+
+<style>
+  /* Mission Log commits to one look — a hero-comic world — on purpose, the same in
+     every viewer theme, the way a kid's app icon doesn't change color at night. */
+  :root {
+    color-scheme: light;
+    --bg:            #123fa3;
+    --bg-deep:       #0b2b7a;
+    --surface:       #ffffff;
+    --surface-sunk:  #eaf0fe;
+    --ink:           #10192b;
+    --ink-secondary: #52627a;
+    --ink-muted:     #8a97ab;
+    --border:        rgba(15,27,46,0.10);
+    --border-strong: rgba(15,27,46,0.18);
+
+    --cat-stem:      #2a78d6;
+    --cat-stem-wash: #e8f0fc;
+    --cat-sport:     #1baf7a;
+    --cat-sport-wash:#e4f7ef;
+    --cat-arts:      #eb6834;
+    --cat-arts-wash: #fdece3;
+    --cat-sleep:     #b8860a;
+    --cat-sleep-wash:#fbf0da;
+
+    --good:          #0ca30c;
+    --good-wash:     #e6f6e6;
+
+    --hero-navy:     #0b1f4d;
+    --hero-gold:     #ffc845;
+    --hero-red:      #e23b3b;
+    --on-hero:       #ffffff;
+    --on-hero-dim:   #c9d8ff;
+    --hero-gold-wash:#fff3d6;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(circle, rgba(255,255,255,0.14) 1.6px, transparent 1.6px) 0 0/24px 24px,
+      radial-gradient(ellipse at 28% 15%, #2e63e6 0%, var(--bg) 45%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    color: var(--on-hero);
+    font-family: "Work Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 40px);
+    min-height: 100vh;
+  }
+
+  .page { max-width: 760px; margin: 0 auto; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 16px;
+    padding-bottom: 18px; border-bottom: 3px solid var(--on-hero); margin-bottom: 22px;
+  }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .emblem { flex: none; filter: drop-shadow(2px 2px 0 rgba(11,31,77,0.5)); }
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--hero-gold); font-weight: 600; margin: 0 0 6px;
+  }
+  h1 {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    font-size: clamp(30px, 6vw, 44px); line-height: 0.95; letter-spacing: -0.01em; margin: 0;
+    text-wrap: balance; color: var(--on-hero);
+    text-shadow: 2px 2px 0 var(--hero-navy), -1px -1px 0 var(--hero-navy), 1px -1px 0 var(--hero-navy), -1px 1px 0 var(--hero-navy);
+  }
+  .date-line { color: var(--on-hero-dim); font-size: 14px; margin-top: 6px; }
+  .streak-tile {
+    text-align: right; font-family: "JetBrains Mono", monospace; color: var(--on-hero-dim); font-size: 12px;
+    position: relative; padding-right: 2px;
+  }
+  .streak-value {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 30px; color: var(--hero-gold);
+    line-height: 1; font-variant-numeric: tabular-nums;
+    text-shadow: 1.5px 1.5px 0 var(--hero-navy);
+  }
+  .rank-line { margin-top: 6px; }
+  .rank-title {
+    color: var(--hero-navy); font-weight: 700; background: var(--hero-gold);
+    padding: 2px 8px; border-radius: 999px; font-size: 11px; letter-spacing: 0.02em;
+  }
+  .rank-next { display: block; font-size: 10px; color: var(--on-hero-dim); margin-top: 4px; }
+
+  .quote-card {
+    background: var(--surface); border: 2.5px solid var(--hero-navy);
+    border-left: 8px solid var(--hero-gold);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(11,31,77,0.35);
+    color: var(--ink);
+  }
+  .quote-eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cat-arts); font-weight: 600; margin: 0 0 4px;
+  }
+  .quote-text {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 19px; margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .card {
+    background: var(--surface); border: 2.5px solid var(--hero-navy); border-radius: 12px;
+    padding: 18px; margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(11,31,77,0.35);
+    color: var(--ink);
+  }
+  .card h2 {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; font-size: 20px; margin: 0 0 4px;
+  }
+  .card .sub { color: var(--ink-secondary); font-size: 13px; margin: 0 0 14px; }
+
+  .msg {
+    font-size: 13.5px; color: var(--good); font-weight: 600; min-height: 18px; margin: -6px 0 12px;
+    transition: opacity 0.3s ease;
+  }
+
+  .item-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 10px; cursor: pointer;
+    border: 1px solid transparent; border-top: 1px solid var(--border); background: none;
+    width: 100%; text-align: left; font: inherit; color: inherit;
+  }
+  .item-row:hover { background: var(--surface-sunk); }
+  .item-row:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+  .item-row:first-child { border-top: none; }
+
+  .box {
+    width: 22px; height: 22px; border-radius: 6px; flex: none;
+    border: 2px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .box svg { width: 13px; height: 13px; display: none; }
+  .item-row.done .box { background: var(--good); border-color: var(--good); }
+  .item-row.done .box svg { display: block; }
+  .box svg path { stroke: white; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .item-row.pending .box { border-color: var(--hero-gold); border-style: dashed; }
+  .item-row.pending { cursor: pointer; }
+  .item-row[disabled] { cursor: default; }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.cat-stem { background: var(--cat-stem); }
+  .dot.cat-sport { background: var(--cat-sport); }
+  .dot.cat-arts { background: var(--cat-arts); }
+  .dot.cat-sleep { background: var(--cat-sleep); }
+  .dot.cat-wellness { background: var(--ink-muted); }
+
+  .item-label { flex: 1; font-size: 14.5px; font-weight: 500; }
+  .item-row.done .item-label { color: var(--ink-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+
+  .pending-badge {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 700; color: var(--hero-navy);
+    background: var(--hero-gold-wash); padding: 3px 8px; border-radius: 999px;
+  }
+
+  .done-badge {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 600; color: var(--ink-muted);
+  }
+
+  .tier-label {
+    font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink-muted); padding: 10px 10px 4px;
+  }
+  .tier-label:first-child { padding-top: 2px; }
+
+  .points-pill {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: var(--hero-navy);
+    background: var(--hero-gold-wash); padding: 3px 10px; border-radius: 999px; flex: none;
+  }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .card-head h2 { margin: 0; }
+
+  .review-row .approve-pill {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; color: #ffffff; background: var(--good);
+    padding: 6px 13px; border-radius: 999px;
+  }
+
+  .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .week-tile {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center;
+    background: var(--surface-sunk); position: relative;
+  }
+  .pending-dot {
+    position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--hero-gold); border: 1px solid var(--hero-navy);
+  }
+  .week-tile.is-today { border-color: var(--cat-stem); background: var(--cat-stem-wash); }
+  .week-day { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-muted); text-transform: uppercase; }
+  .week-frac { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 20px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .week-tile.is-future .week-frac { color: var(--ink-muted); font-size: 12px; font-family: "Work Sans", sans-serif; font-weight: 500; }
+  .bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--good); }
+
+  .empty-state { color: var(--ink-secondary); font-size: 14px; padding: 6px 2px; }
+
+  .week-tile { cursor: pointer; }
+  .week-tile:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+  .week-tile.is-open { border-color: var(--cat-stem); }
+
+  .day-detail {
+    margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .day-detail-head {
+    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px;
+  }
+  .day-detail-title { font-weight: 600; font-size: 14px; }
+  .day-link {
+    font-size: 12px; color: var(--cat-stem); text-decoration: none; font-weight: 600;
+  }
+  .day-link:hover { text-decoration: underline; }
+
+  .progress-chart {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end;
+    height: 120px; padding-top: 8px;
+  }
+  .progress-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .progress-pct { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--ink-secondary); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .progress-bar-track { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+  .progress-bar {
+    width: 100%; background: var(--cat-stem); border-radius: 4px 4px 2px 2px; min-height: 3px;
+  }
+  .progress-col.is-current .progress-bar { background: var(--good); }
+  .progress-label { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--ink-muted); margin-top: 6px; text-align: center; }
+
+  .balance-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .balance-amount {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 34px; color: var(--hero-navy);
+    font-variant-numeric: tabular-nums;
+  }
+  .balance-actions { display: flex; gap: 8px; flex: none; }
+  .reward-btn {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 7px 14px; border-radius: 999px; border: 2px solid var(--hero-navy); background: var(--surface);
+    color: var(--hero-navy); cursor: pointer;
+  }
+  .reward-btn-add { background: var(--good); border-color: var(--good); color: #ffffff; }
+
+  .reward-form {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+  .reward-form input {
+    flex: 1; min-width: 130px; padding: 9px 11px; border: 1px solid var(--border-strong); border-radius: 8px;
+    font: inherit; font-size: 13.5px; color: var(--ink);
+  }
+  .reward-form-actions { display: flex; gap: 8px; flex: none; }
+  .reward-save {
+    background: var(--good); color: #ffffff; border: none; border-radius: 8px; padding: 9px 15px;
+    font-weight: 700; cursor: pointer; font: inherit;
+  }
+  .reward-cancel {
+    background: none; border: 1px solid var(--border-strong); border-radius: 8px; padding: 9px 15px;
+    cursor: pointer; color: var(--ink-secondary); font: inherit;
+  }
+
+  .reward-ledger { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 9px; }
+  .reward-entry { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; }
+  .reward-entry-note { color: var(--ink-secondary); }
+  .reward-entry-amount { font-family: "JetBrains Mono", monospace; font-weight: 700; flex: none; }
+  .reward-entry-amount.is-add { color: var(--good); }
+  .reward-entry-amount.is-spend { color: var(--hero-red); }
+
+  .load-state { text-align: center; padding: 60px 20px; color: var(--on-hero-dim); font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  .load-state.is-error { color: #ffd7d7; }
+
+  footer { margin-top: 24px; font-size: 11.5px; color: var(--on-hero-dim); line-height: 1.6; text-align: center; }
+</head>
+<body>
+<div class="page" id="app">
+  <div class="load-state">Loading Mission Log…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
