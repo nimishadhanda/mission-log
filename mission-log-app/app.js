@@ -17,7 +17,7 @@
 
   // Sleep is a main pillar — added to every day, same as the wellness items were.
   var MAIN_DAILY_ITEMS = [
-    { id: 'sleep', label: 'Asleep on time', cat: 'sleep', tier: 'main' }
+    { id: 'sleep', label: 'Asleep on time', cat: 'sleep', tier: 'main' },    { id: 'writing', label: 'Writing — 5 lines', cat: 'stem', tier: 'main' }
   ];
 
   // Good-to-do daily habits — worth fewer points than the main pillars, but still
