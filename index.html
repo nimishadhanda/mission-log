@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<title>Mission Log</title>
+
+<style>
+  /* Mission Log commits to one look — a hero-comic world — on purpose, the same in
+     every viewer theme, the way a kid's app icon doesn't change color at night. */
+  :root {
+    color-scheme: light;
+    --bg:            #123fa3;
+    --bg-deep:       #0b2b7a;
+    --surface:       #ffffff;
+    --surface-sunk:  #eaf0fe;
+    --ink:           #10192b;
+    --ink-secondary: #52627a;
+    --ink-muted:     #8a97ab;
+    --border:        rgba(15,27,46,0.10);
+    --border-strong: rgba(15,27,46,0.18);
+
+    --cat-stem:      #2a78d6;
+    --cat-stem-wash: #e8f0fc;
+    --cat-sport:     #1baf7a;
+    --cat-sport-wash:#e4f7ef;
+    --cat-arts:      #eb6834;
+    --cat-arts-wash: #fdece3;
+    --cat-sleep:     #b8860a;
+    --cat-sleep-wash:#fbf0da;
+    --cat-school:    #6a4fc2;
+    --cat-school-wash:#efe9fb;
+    --cat-meal:      #d19a2c;
+    --cat-meal-wash: #faf1de;
+    --cat-fillable:  #4a5568;
+    --cat-fillable-wash:#eef1f5;
+
+    --good:          #0ca30c;
+    --good-wash:     #e6f6e6;
+
+    --hero-navy:     #0b1f4d;
+    --hero-gold:     #ffc845;
+    --hero-red:      #e23b3b;
+    --on-hero:       #ffffff;
+    --on-hero-dim:   #c9d8ff;
+    --hero-gold-wash:#fff3d6;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(circle, rgba(255,255,255,0.14) 1.6px, transparent 1.6px) 0 0/24px 24px,
+      radial-gradient(ellipse at 28% 15%, #2e63e6 0%, var(--bg) 45%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    color: var(--on-hero);
+    font-family: "Work Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 40px);
+    min-height: 100vh;
+  }
+
+  .page { max-width: 760px; margin: 0 auto; padding-top: 54px; position: relative; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 16px;
+    padding-bottom: 18px; border-bottom: 3px solid var(--on-hero); margin-bottom: 22px;
+  }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .emblem { flex: none; filter: drop-shadow(2px 2px 0 rgba(11,31,77,0.5)); }
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--hero-gold); font-weight: 600; margin: 0 0 6px;
+  }
+  h1 {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    font-size: clamp(30px, 6vw, 44px); line-height: 0.95; letter-spacing: -0.01em; margin: 0;
+    text-wrap: balance; color: var(--on-hero);
+    text-shadow: 2px 2px 0 var(--hero-navy), -1px -1px 0 var(--hero-navy), 1px -1px 0 var(--hero-navy), -1px 1px 0 var(--hero-navy);
+  }
+  .date-line { color: var(--on-hero-dim); font-size: 14px; margin-top: 6px; }
+  .streak-tile {
+    text-align: right; font-family: "JetBrains Mono", monospace; color: var(--on-hero-dim); font-size: 12px;
+    position: relative; padding-right: 2px;
+  }
+  .streak-value {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 30px; color: var(--hero-gold);
+    line-height: 1; font-variant-numeric: tabular-nums;
+    text-shadow: 1.5px 1.5px 0 var(--hero-navy);
+  }
+  .rank-line { margin-top: 6px; }
+  .rank-title {
+    color: var(--hero-navy); font-weight: 700; background: var(--hero-gold);
+    padding: 2px 8px; border-radius: 999px; font-size: 11px; letter-spacing: 0.02em;
+  }
+  .rank-next { display: block; font-size: 10px; color: var(--on-hero-dim); margin-top: 4px; }
+
+  .quote-card {
+    background: var(--surface); border: 2.5px solid var(--hero-navy);
+    border-left: 8px solid var(--hero-gold);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(11,31,77,0.35);
+    color: var(--ink);
+  }
+  .quote-eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cat-arts); font-weight: 600; margin: 0 0 4px;
+  }
+  .quote-text {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 19px; margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .card {
+    background: var(--surface); border: 2.5px solid var(--hero-navy); border-radius: 12px;
+    padding: 18px; margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(11,31,77,0.35);
+    color: var(--ink);
+  }
+  .card h2 {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; font-size: 20px; margin: 0 0 4px;
+  }
+  .card .sub { color: var(--ink-secondary); font-size: 13px; margin: 0 0 14px; }
+
+  .msg {
+    font-size: 13.5px; color: var(--good); font-weight: 600; min-height: 18px; margin: -6px 0 12px;
+    transition: opacity 0.3s ease;
+  }
+
+  .item-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+    padding: 6px 10px; border-top: 1px solid var(--border);
+  }
+  .item-row:first-child { border-top: none; }
+
+  .item-toggle {
+    display: flex; align-items: center; gap: 12px; flex: 1 0 auto; max-width: 100%;
+    padding: 5px 4px; margin: 0 -4px; cursor: pointer;
+    border: 1px solid transparent; border-radius: 8px; background: none;
+    text-align: left; font: inherit; color: inherit;
+  }
+  .item-toggle:hover { background: var(--surface-sunk); }
+  .item-toggle:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+  .item-toggle[disabled] { cursor: default; }
+
+  .box {
+    width: 22px; height: 22px; border-radius: 6px; flex: none;
+    border: 2px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .box svg { width: 13px; height: 13px; display: none; }
+  .item-row.done .box { background: var(--good); border-color: var(--good); }
+  .item-row.done .box svg { display: block; }
+  .box svg path { stroke: white; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .item-row.pending .box { border-color: var(--hero-gold); border-style: dashed; }
+
+  /* Parent Review rows are plain <button class="item-row review-row"> elements
+     (no .item-toggle wrapper), so they need their own button-reset + interactive
+     styling rather than sharing .item-toggle's. */
+  .review-row {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 10px 10px; margin: 0; text-align: left; font: inherit; color: inherit;
+    background: none; border: none; cursor: pointer; border-radius: 6px;
+  }
+  .review-row:hover { background: var(--surface-sunk); }
+  .review-row:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.cat-stem { background: var(--cat-stem); }
+  .dot.cat-sport { background: var(--cat-sport); }
+  .dot.cat-arts { background: var(--cat-arts); }
+  .dot.cat-sleep { background: var(--cat-sleep); }
+  .dot.cat-wellness { background: var(--ink-muted); }
+
+  .item-label { flex: 1; font-size: 14.5px; font-weight: 500; }
+  .item-row.done .item-label { color: var(--ink-secondary); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+
+  .pending-badge {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 700; color: var(--hero-navy);
+    background: var(--hero-gold-wash); padding: 3px 8px; border-radius: 999px;
+  }
+
+  .done-badge {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 600; color: var(--ink-muted);
+  }
+
+  .tier-label {
+    font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink-muted); padding: 10px 10px 4px;
+  }
+  .tier-label:first-child { padding-top: 2px; }
+
+  .points-pill {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: var(--hero-navy);
+    background: var(--hero-gold-wash); padding: 3px 10px; border-radius: 999px; flex: none;
+  }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .card-head h2 { margin: 0; }
+
+  .review-row .approve-pill {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; color: #ffffff; background: var(--good);
+    padding: 6px 13px; border-radius: 999px;
+  }
+
+  .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .week-tile {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center;
+    background: var(--surface-sunk); position: relative;
+  }
+  .pending-dot {
+    position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--hero-gold); border: 1px solid var(--hero-navy);
+  }
+  .week-tile.is-today { border-color: var(--cat-stem); background: var(--cat-stem-wash); }
+  .week-day { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-muted); text-transform: uppercase; }
+  .week-frac { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 20px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .week-tile.is-future .week-frac { color: var(--ink-muted); font-size: 12px; font-family: "Work Sans", sans-serif; font-weight: 500; }
+  .bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--good); }
+
+  .empty-state { color: var(--ink-secondary); font-size: 14px; padding: 6px 2px; }
+
+  .week-tile { cursor: pointer; }
+  .week-tile:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+  .week-tile.is-open { border-color: var(--cat-stem); }
+
+  .day-detail {
+    margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .day-detail-head {
+    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px;
+  }
+  .day-detail-title { font-weight: 600; font-size: 14px; }
+  .day-link {
+    font-size: 12px; color: var(--cat-stem); text-decoration: none; font-weight: 600;
+  }
+  .day-link:hover { text-decoration: underline; }
+
+  .progress-chart {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end;
+    height: 120px; padding-top: 8px;
+  }
+  .progress-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .progress-pct { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--ink-secondary); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .progress-bar-track { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+  .progress-bar {
+    width: 100%; background: var(--cat-stem); border-radius: 4px 4px 2px 2px; min-height: 3px;
+  }
+  .progress-col.is-current .progress-bar { background: var(--good); }
+  .progress-label { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--ink-muted); margin-top: 6px; text-align: center; }
+
+  .balance-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .balance-amount {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 34px; color: var(--hero-navy);
+    font-variant-numeric: tabular-nums;
+  }
+  .balance-actions { display: flex; gap: 8px; flex: none; }
+  .reward-btn {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 7px 14px; border-radius: 999px; border: 2px solid var(--hero-navy); background: var(--surface);
+    color: var(--hero-navy); cursor: pointer;
+  }
+  .reward-btn-add { background: var(--good); border-color: var(--good); color: #ffffff; }
+
+  .reward-form {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+  .reward-form input {
+    flex: 1; min-width: 130px; padding: 9px 11px; border: 1px solid var(--border-strong); border-radius: 8px;
+    font: inherit; font-size: 13.5px; color: var(--ink);
+  }
+  .reward-form-actions { display: flex; gap: 8px; flex: none; }
+  .reward-save {
+    background: var(--good); color: #ffffff; border: none; border-radius: 8px; padding: 9px 15px;
+    font-weight: 700; cursor: pointer; font: inherit;
+  }
+  .reward-cancel {
+    background: none; border: 1px solid var(--border-strong); border-radius: 8px; padding: 9px 15px;
+    cursor: pointer; color: var(--ink-secondary); font: inherit;
+  }
+
+  .reward-ledger { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 9px; }
+  .reward-entry { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; }
+  .reward-entry-note { color: var(--ink-secondary); }
+  .reward-entry-amount { font-family: "JetBrains Mono", monospace; font-weight: 700; flex: none; }
+  .reward-entry-amount.is-add { color: var(--good); }
+  .reward-entry-amount.is-spend { color: var(--hero-red); }
+
+  .load-state { text-align: center; padding: 60px 20px; color: var(--on-hero-dim); font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  .load-state.is-error { color: #ffd7d7; }
+
+  footer { margin-top: 24px; font-size: 11.5px; color: var(--on-hero-dim); line-height: 1.6; text-align: center; }
+
+  /* ---- time chip / picker on each item row ---- */
+  .time-chip {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600;
+    color: var(--ink-secondary); background: var(--surface-sunk); border: 1px solid transparent;
+    padding: 4px 9px; border-radius: 999px; font-variant-numeric: tabular-nums;
+  }
+  .time-chip-editable {
+    cursor: pointer; color: var(--hero-navy); border: 1px dashed var(--border-strong);
+  }
+  .time-chip-editable:hover { background: var(--cat-stem-wash); border-color: var(--cat-stem); }
+  .time-set-btn {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.02em; color: var(--ink-muted); background: none;
+    border: 1px dashed var(--border-strong); padding: 4px 9px; border-radius: 999px; cursor: pointer;
+  }
+  .time-set-btn:hover { color: var(--hero-navy); border-color: var(--hero-navy); background: var(--surface-sunk); }
+  .time-edit-form { flex: none; display: flex; align-items: center; gap: 6px; }
+  .time-input {
+    font: inherit; font-size: 12.5px; padding: 4px 6px; border: 1px solid var(--border-strong);
+    border-radius: 6px; color: var(--ink);
+  }
+  .time-save {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: #ffffff;
+    background: var(--good); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer;
+  }
+
+  /* ---- "finish before free time" reminder banner ---- */
+  .time-reminder {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+    background: var(--hero-gold-wash); border: 1.5px solid var(--hero-gold);
+  }
+  .time-reminder-mark {
+    display: block; font-weight: 700; font-size: 13px; color: var(--hero-navy);
+  }
+  .time-reminder-list {
+    display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-secondary);
+  }
+
+  /* ---- hamburger button (always visible, opens the full-day drawer) ---- */
+  .hamburger-btn {
+    position: fixed; top: 16px; left: 16px; z-index: 40;
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--hero-gold); border: 2.5px solid var(--hero-navy);
+    box-shadow: 3px 3px 0 rgba(11,31,77,0.5);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    cursor: pointer; padding: 0;
+  }
+  .hamburger-btn span {
+    display: block; width: 20px; height: 3px; border-radius: 2px; background: var(--hero-navy);
+  }
+  .hamburger-btn:hover { background: #ffd569; }
+
+  /* ---- full-day plan drawer ---- */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(11,31,77,0.55); z-index: 50;
+    animation: drawer-fade 0.15s ease;
+  }
+  .drawer-panel {
+    position: fixed; top: 0; left: 0; bottom: 0; width: min(330px, 88vw); z-index: 51;
+    background: var(--surface); color: var(--ink); overflow-y: auto;
+    box-shadow: 6px 0 0 rgba(11,31,77,0.35);
+    padding: 16px 14px 24px;
+    animation: drawer-slide 0.18s ease;
+  }
+  @keyframes drawer-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes drawer-slide { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 2px solid var(--hero-navy); margin-bottom: 12px;
+  }
+  .drawer-title {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; font-size: 19px; color: var(--hero-navy);
+  }
+  .drawer-close {
+    flex: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    background: var(--surface-sunk); border: 1.5px solid var(--border-strong); color: var(--ink);
+    font-size: 13px; line-height: 1;
+  }
+  .drawer-close:hover { background: var(--hero-gold-wash); border-color: var(--hero-gold); }
+
+  .drawer-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .drawer-tab {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--border-strong);
+    background: var(--surface); color: var(--ink-secondary); cursor: pointer;
+  }
+  .drawer-tab.is-today { border-color: var(--cat-stem); color: var(--cat-stem); }
+  .drawer-tab.is-active { background: var(--hero-navy); border-color: var(--hero-navy); color: #ffffff; }
+
+  .drawer-timeline { display: flex; flex-direction: column; gap: 8px; }
+  .timeline-block {
+    border-radius: 8px; padding: 9px 10px; background: var(--surface-sunk);
+    border-left: 5px solid var(--ink-muted);
+  }
+  .timeline-block.cat-stem   { border-left-color: var(--cat-stem);   background: var(--cat-stem-wash); }
+  .timeline-block.cat-sport  { border-left-color: var(--cat-sport);  background: var(--cat-sport-wash); }
+  .timeline-block.cat-arts   { border-left-color: var(--cat-arts);   background: var(--cat-arts-wash); }
+  .timeline-block.cat-sleep  { border-left-color: var(--cat-sleep);  background: var(--cat-sleep-wash); }
+  .timeline-block.cat-school { border-left-color: var(--cat-school); background: var(--cat-school-wash); }
+  .timeline-block.cat-meal   { border-left-color: var(--cat-meal);   background: var(--cat-meal-wash); }
+  .timeline-block.cat-open,
+  .timeline-block.cat-pickyour,
+  .timeline-block.cat-build {
+    border-left-style: dashed; border-left-color: var(--cat-fillable); background: var(--cat-fillable-wash);
+  }
+  .timeline-time {
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--ink-muted);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  }
+  .timeline-label { font-size: 13.5px; font-weight: 600; margin-top: 2px; }
+
+  .timeline-plans { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .plan-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--hero-navy);
+    background: var(--hero-gold-wash); border: 1px solid var(--hero-gold);
+    padding: 4px 6px 4px 10px; border-radius: 999px;
+  }
+  .plan-chip-remove {
+    flex: none; width: 16px; height: 16px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(11,31,77,0.12); color: var(--hero-navy); font-size: 9px; line-height: 1; padding: 0;
+  }
+  .plan-chip-remove:hover { background: var(--hero-red); color: #ffffff; }
+
+  .plan-add-btn {
+    margin-top: 8px; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    color: var(--cat-fillable); background: none; border: 1.5px dashed var(--cat-fillable);
+    padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .plan-add-btn:hover { background: #ffffff; }
+  .plan-add-form { margin-top: 8px; display: flex; gap: 6px; }
+  .plan-input {
+    flex: 1; min-width: 0; font: inherit; font-size: 12.5px; padding: 6px 9px;
+    border: 1px solid var(--border-strong); border-radius: 8px; color: var(--ink);
+  }
+  .plan-save {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: #ffffff;
+    background: var(--good); border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="page" id="app">
+  <div class="load-state">Loading Mission Log…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
