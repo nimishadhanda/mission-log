@@ -17,7 +17,8 @@
 
   // Sleep is a main pillar — added to every day, same as the wellness items were.
   var MAIN_DAILY_ITEMS = [
-    { id: 'sleep', label: 'Asleep on time', cat: 'sleep', tier: 'main' },    { id: 'writing', label: 'Writing — 5 lines', cat: 'stem', tier: 'main' }
+    { id: 'sleep', label: 'Asleep on time', cat: 'sleep', tier: 'main' },
+    { id: 'writing', label: 'Writing — 5 lines', cat: 'stem', tier: 'main' }
   ];
 
   // Good-to-do daily habits — worth fewer points than the main pillars, but still
@@ -58,6 +59,136 @@
     return MAIN_DAILY_ITEMS.concat(DAY_ITEMS[dayName]).concat(GOOD_DAILY_ITEMS);
   }
   function pointsFor(item) { return POINTS[item.tier] || POINTS.good; }
+
+  // ---- full-day timeline (from Mission Week) + default times for checklist items ----
+  // This is the same time-blocked plan as the separate Mission Week page, brought
+  // inline so Moksh can see "what's happening when" without leaving Mission Log.
+  // 'open' / 'pickyour' / 'build' blocks are the ones Moksh can add his own plans into.
+  var TIME_BLOCKS = {
+    Monday: [
+      ['06:30','07:05','Wake & morning routine','meal'],
+      ['07:05','15:20','School','school'],
+      ['15:20','15:45','Snack & unwind','meal'],
+      ['15:45','16:15','Olympiad practice — English','stem'],
+      ['16:15','16:20','Open time','open'],
+      ['16:20','16:45','Ukulele practice','arts'],
+      ['16:45','17:00','Open time','open'],
+      ['17:00','18:00','Football','sport'],
+      ['18:00','19:30','Play time','open'],
+      ['19:30','20:00','Shower & wind down','meal'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','06:30','Sleep','sleep']
+    ],
+    Tuesday: [
+      ['06:30','07:05','Wake & morning routine','meal'],
+      ['07:05','15:20','School','school'],
+      ['15:20','15:45','Snack & unwind','meal'],
+      ['15:45','16:00','Open time','open'],
+      ['16:00','17:00','Cricket','sport'],
+      ['17:00','17:15','Open time','open'],
+      ['17:15','17:45','Olympiad practice — Science','stem'],
+      ['17:45','18:00','Open time','open'],
+      ['18:00','19:00','Strength & Conditioning','sport'],
+      ['19:00','19:45','Play time','open'],
+      ['19:45','20:00','Shower & wind down','meal'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','06:30','Sleep','sleep']
+    ],
+    Wednesday: [
+      ['06:30','07:05','Wake & morning routine','meal'],
+      ['07:05','15:20','School','school'],
+      ['15:20','15:45','Snack & unwind','meal'],
+      ['15:45','16:15','Olympiad practice — English','stem'],
+      ['16:15','16:20','Open time','open'],
+      ['16:20','16:45','Ukulele practice','arts'],
+      ['16:45','17:00','Open time','open'],
+      ['17:00','18:00','Football','sport'],
+      ['18:00','19:30','Play time','open'],
+      ['19:30','20:00','Shower & wind down','meal'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','06:30','Sleep','sleep']
+    ],
+    Thursday: [
+      ['06:30','07:05','Wake & morning routine','meal'],
+      ['07:05','15:20','School','school'],
+      ['15:20','15:45','Snack & unwind','meal'],
+      ['15:45','16:00','Open time','open'],
+      ['16:00','17:00','Cricket','sport'],
+      ['17:00','17:15','Open time','open'],
+      ['17:15','17:45','Olympiad practice — English','stem'],
+      ['17:45','18:00','Open time','open'],
+      ['18:00','19:00','Strength & Conditioning','sport'],
+      ['19:00','19:45','Play time','open'],
+      ['19:45','20:00','Shower & wind down','meal'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','06:30','Sleep','sleep']
+    ],
+    Friday: [
+      ['06:30','07:05','Wake & morning routine','meal'],
+      ['07:05','15:20','School','school'],
+      ['15:20','15:45','Snack & unwind','meal'],
+      ['15:45','16:15','Olympiad practice — Science','stem'],
+      ['16:15','16:20','Open time','open'],
+      ['16:20','16:50','Ukulele practice','arts'],
+      ['16:50','17:00','Open time','open'],
+      ['17:00','18:30','Build time','build'],
+      ['18:30','20:00','Play time','open'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','21:30','Pick your activity','pickyour'],
+      ['21:30','22:00','Wind-down routine','meal'],
+      ['22:00','07:00','Sleep','sleep']
+    ],
+    Saturday: [
+      ['06:30','08:00','Wake, breakfast & morning routine','meal'],
+      ['08:00','09:00','Swimming','sport'],
+      ['09:00','09:30','Post-swim snack & rest','meal'],
+      ['09:30','10:00','Open time','open'],
+      ['10:00','10:30','Olympiad practice — English','stem'],
+      ['10:30','11:00','Open time','open'],
+      ['11:00','12:00','Robotics','stem'],
+      ['12:00','13:30','Pick your activity','pickyour'],
+      ['13:30','14:00','Lunch','meal'],
+      ['14:00','16:30','Open time','open'],
+      ['16:30','17:30','Ukulele class','arts'],
+      ['17:30','18:00','Open time','open'],
+      ['18:00','19:00','Strength & Conditioning','sport'],
+      ['19:00','20:00','Open time','open'],
+      ['20:00','21:30','Movie time','open'],
+      ['21:30','22:00','Wind-down routine','meal'],
+      ['22:00','07:00','Sleep','sleep']
+    ],
+    Sunday: [
+      ['06:30','08:00','Wake, breakfast & morning routine','meal'],
+      ['08:00','09:00','Swimming','sport'],
+      ['09:00','10:00','Open time','open'],
+      ['10:00','10:30','Olympiad practice — choose your subject','stem'],
+      ['10:30','19:30','Open time','open'],
+      ['19:30','20:00','Wind down & shower','meal'],
+      ['20:00','20:30','Dinner','meal'],
+      ['20:30','06:00','Sleep','sleep']
+    ]
+  };
+  function isFillableBlock(cat) { return cat === 'open' || cat === 'pickyour' || cat === 'build'; }
+  function fmtTime(hhmm) {
+    var parts = hhmm.split(':'); var h = parseInt(parts[0], 10), m = parts[1];
+    var ap = h < 12 ? 'AM' : 'PM'; var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + (m !== '00' ? ':' + m : '') + ' ' + ap;
+  }
+
+  // Checklist items that already have a named block in the day's timeline above —
+  // matched by hand (safer than guessing from labels) so their time can be shown
+  // right on the checklist instead of only in the full-day view.
+  var ITEM_DEFAULT_TIMES = {
+    Monday:    { olympiad:['15:45','16:15'], ukulele:['16:20','16:45'], football:['17:00','18:00'], dinner:['20:00','20:30'], sleep:['20:30','06:30'] },
+    Tuesday:   { cricket:['16:00','17:00'], olympiad:['17:15','17:45'], sc:['18:00','19:00'], dinner:['20:00','20:30'], sleep:['20:30','06:30'] },
+    Wednesday: { olympiad:['15:45','16:15'], ukulele:['16:20','16:45'], football:['17:00','18:00'], dinner:['20:00','20:30'], sleep:['20:30','06:30'] },
+    Thursday:  { cricket:['16:00','17:00'], olympiad:['17:15','17:45'], sc:['18:00','19:00'], dinner:['20:00','20:30'], sleep:['20:30','06:30'] },
+    Friday:    { olympiad:['15:45','16:15'], ukulele:['16:20','16:50'], dinner:['20:00','20:30'], sleep:['22:00','07:00'] },
+    Saturday:  { swim:['08:00','09:00'], olympiad:['10:00','10:30'], robotics:['11:00','12:00'], ukuleleclass:['16:30','17:30'], sc:['18:00','19:00'], sleep:['22:00','07:00'] },
+    Sunday:    { swim:['08:00','09:00'], olympiad:['10:00','10:30'], dinner:['20:00','20:30'], sleep:['20:30','06:00'] }
+  };
+  // Items with no fixed slot at all (feet/water/brush/writing): Moksh picks his own
+  // time for these, per day — stored in extras.itemTimes, never hardcoded here.
 
   var ENCOURAGEMENTS = [
     "Nice one!", "That's one more done.", "Great focus.", "Good going.",
@@ -147,9 +278,56 @@
     return out;
   }
 
-  var STATE = { completions: {}, rewards: { balance: 0, ledger: [] } };
+  // extras.itemTimes: "<dateKey>|<itemId>" -> "HH:MM" Moksh picked for an item with
+  // no fixed slot. extras.customPlans: "<dateKey>|<blockIndex>" -> [{id,label}, ...]
+  // his own entries added into an Open/Pick-your-activity/Build-time block.
+  function normalizeExtras(raw) {
+    var r = (raw && typeof raw === 'object') ? raw : {};
+    return {
+      itemTimes: (r.itemTimes && typeof r.itemTimes === 'object') ? r.itemTimes : {},
+      customPlans: (r.customPlans && typeof r.customPlans === 'object') ? r.customPlans : {}
+    };
+  }
+
+  var STATE = { completions: {}, rewards: { balance: 0, ledger: [] }, extras: { itemTimes: {}, customPlans: {} } };
   var stateLoaded = false;
   var loadError = null;
+
+  function defaultTimeFor(dayName, itemId) {
+    var byDay = ITEM_DEFAULT_TIMES[dayName];
+    return (byDay && byDay[itemId]) ? byDay[itemId] : null;
+  }
+  function pickedTimeFor(dateKeyStr, itemId) {
+    return STATE.extras.itemTimes[dateKeyStr + '|' + itemId] || null;
+  }
+  function setPickedTime(dateKeyStr, itemId, hhmm) {
+    var next = Object.assign({}, STATE, { extras: Object.assign({}, STATE.extras, {
+      itemTimes: Object.assign({}, STATE.extras.itemTimes)
+    }) });
+    if (hhmm) next.extras.itemTimes[dateKeyStr + '|' + itemId] = hhmm;
+    else delete next.extras.itemTimes[dateKeyStr + '|' + itemId];
+    STATE = next;
+  }
+  function customPlansFor(dateKeyStr, blockIndex) {
+    return STATE.extras.customPlans[dateKeyStr + '|' + blockIndex] || [];
+  }
+  function addCustomPlan(dateKeyStr, blockIndex, label) {
+    var next = Object.assign({}, STATE, { extras: Object.assign({}, STATE.extras, {
+      customPlans: Object.assign({}, STATE.extras.customPlans)
+    }) });
+    var listKey = dateKeyStr + '|' + blockIndex;
+    var list = (next.extras.customPlans[listKey] || []).concat([{ id: genId(), label: label }]);
+    next.extras.customPlans[listKey] = list;
+    STATE = next;
+  }
+  function removeCustomPlan(dateKeyStr, blockIndex, planId) {
+    var next = Object.assign({}, STATE, { extras: Object.assign({}, STATE.extras, {
+      customPlans: Object.assign({}, STATE.extras.customPlans)
+    }) });
+    var listKey = dateKeyStr + '|' + blockIndex;
+    next.extras.customPlans[listKey] = (next.extras.customPlans[listKey] || []).filter(function (p) { return p.id !== planId; });
+    STATE = next;
+  }
 
   function isSubmitted(key) { var c = STATE.completions[key]; return !!(c && c.submitted); }
   function isDone(key) { var c = STATE.completions[key]; return !!(c && c.approved); }
@@ -199,6 +377,10 @@
   var weekDates = [0,1,2,3,4,5,6].map(function (i) { return addDays(monday, i); });
   var selectedDayKey = null; // UI-only, not persisted
   var rewardFormOpen = null; // 'add' | 'spend' | null — UI-only, not persisted
+  var timeEditorKey = null; // "<dateKey>|<itemId>" of the item whose time picker is open, or null
+  var drawerOpen = false; // full-day timeline side panel — UI-only
+  var drawerDayKey = null; // dateKey being viewed in the drawer; set to today's when opened
+  var planFormBlock = null; // "<dateKey>|<blockIndex>" whose "add your own" form is open, or null
 
   var lastMessage = null; // UI-only, not persisted — survives one renderApp() pass, then clears itself
   var msgTimer = null;
@@ -220,28 +402,44 @@
     return streak;
   }
 
+  // An item either has a fixed default time (from the day's timeline), a time
+  // Moksh picked himself, or neither — in which case it's untimed and shows up
+  // in the "finish before free time" reminder at the top of Today.
+  function timeInfoFor(dName, dKeyStr, itemId) {
+    var def = defaultTimeFor(dName, itemId);
+    if (def) return { label: fmtTime(def[0]), editable: false };
+    var picked = pickedTimeFor(dKeyStr, itemId);
+    if (picked) return { label: fmtTime24to12(picked), editable: true, raw: picked };
+    return null;
+  }
+  function fmtTime24to12(hhmm) { return fmtTime(hhmm); }
+
   function renderItemRow(d, item, allowToggle) {
-    var key = dateKey(d) + '|' + item.id;
+    var dName = dayNameOf(d);
+    var dKeyStr = dateKey(d);
+    var key = dKeyStr + '|' + item.id;
     var done = isDone(key);
     var submitted = isSubmitted(key);
-    var row = document.createElement('button');
-    row.type = 'button';
+
+    var row = document.createElement('div');
     row.className = 'item-row' + (done ? ' done' : (submitted ? ' pending' : ''));
-    row.innerHTML =
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'item-toggle';
+    toggle.innerHTML =
       '<span class="box"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></span>' +
       '<span class="dot cat-' + item.cat + '"></span>' +
-      '<span class="item-label"></span>' +
-      (submitted && !done ? '<span class="pending-badge">Waiting for Mom</span>' : '') +
-      (done ? '<span class="done-badge">Tap to undo</span>' : '');
-    row.querySelector('.item-label').textContent = item.label;
+      '<span class="item-label"></span>';
+    toggle.querySelector('.item-label').textContent = item.label;
     if (done) {
-      row.addEventListener('click', function () {
+      toggle.addEventListener('click', function () {
         unapproveItem(key);
         setFlash('Approval undone — back to waiting for Mom.');
         persistAndRender();
       });
     } else if (allowToggle) {
-      row.addEventListener('click', function () {
+      toggle.addEventListener('click', function () {
         if (submitted) {
           unsubmitItem(key);
         } else {
@@ -251,7 +449,55 @@
         persistAndRender();
       });
     } else {
-      row.disabled = true;
+      toggle.disabled = true;
+    }
+    row.appendChild(toggle);
+
+    // ---- time chip / picker (only meaningful for today-and-earlier interactive rows) ----
+    var info = timeInfoFor(dName, dKeyStr, item.id);
+    var isEditingTime = timeEditorKey === key;
+    if (isEditingTime) {
+      var form = document.createElement('span');
+      form.className = 'time-edit-form';
+      form.innerHTML = '<input type="time" class="time-input"><button type="button" class="time-save">Save</button>';
+      var input = form.querySelector('.time-input');
+      if (info && info.raw) input.value = info.raw;
+      form.querySelector('.time-save').addEventListener('click', function () {
+        if (input.value) setPickedTime(dKeyStr, item.id, input.value);
+        timeEditorKey = null;
+        persistAndRender();
+      });
+      row.appendChild(form);
+    } else if (info) {
+      var chip = document.createElement(info.editable ? 'button' : 'span');
+      chip.type = info.editable ? 'button' : undefined;
+      chip.className = 'time-chip' + (info.editable ? ' time-chip-editable' : '');
+      chip.textContent = info.label;
+      if (info.editable) {
+        chip.title = 'Tap to change the time';
+        chip.addEventListener('click', function () { timeEditorKey = key; renderApp(); });
+      }
+      row.appendChild(chip);
+    } else if (allowToggle && !done) {
+      var setBtn = document.createElement('button');
+      setBtn.type = 'button';
+      setBtn.className = 'time-set-btn';
+      setBtn.textContent = 'Set time';
+      setBtn.addEventListener('click', function () { timeEditorKey = key; renderApp(); });
+      row.appendChild(setBtn);
+    }
+
+    if (submitted && !done) {
+      var pb = document.createElement('span');
+      pb.className = 'pending-badge';
+      pb.textContent = 'Waiting for Mom';
+      row.appendChild(pb);
+    }
+    if (done) {
+      var db = document.createElement('span');
+      db.className = 'done-badge';
+      db.textContent = 'Tap to undo';
+      row.appendChild(db);
     }
     return row;
   }
@@ -274,6 +520,115 @@
       container.appendChild(goodLabel);
       goodItems.forEach(function (item) { container.appendChild(renderItemRow(d, item, allowToggle)); });
     }
+  }
+
+  // The hamburger + full-day timeline drawer — a prominent, always-available way
+  // to see the whole day (fixed times + open blocks) without leaving Mission Log.
+  function renderDrawer(app) {
+    var hamburger = document.createElement('button');
+    hamburger.type = 'button';
+    hamburger.className = 'hamburger-btn';
+    hamburger.setAttribute('aria-label', 'Open full day plan');
+    hamburger.innerHTML = '<span></span><span></span><span></span>';
+    hamburger.addEventListener('click', function () {
+      drawerOpen = true;
+      if (!drawerDayKey) drawerDayKey = dateKey(today);
+      renderApp();
+    });
+    app.appendChild(hamburger);
+
+    if (!drawerOpen) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'drawer-overlay';
+    overlay.addEventListener('click', function () { drawerOpen = false; renderApp(); });
+    app.appendChild(overlay);
+
+    var panel = document.createElement('div');
+    panel.className = 'drawer-panel';
+
+    var head = document.createElement('div');
+    head.className = 'drawer-head';
+    head.innerHTML = '<span class="drawer-title">Full Day Plan</span><button type="button" class="drawer-close" aria-label="Close">✕</button>';
+    head.querySelector('.drawer-close').addEventListener('click', function () { drawerOpen = false; renderApp(); });
+    panel.appendChild(head);
+
+    var tabs = document.createElement('div');
+    tabs.className = 'drawer-tabs';
+    weekDates.forEach(function (d) {
+      var dKeyStr = dateKey(d);
+      var tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'drawer-tab' + (dKeyStr === drawerDayKey ? ' is-active' : '') + (dKeyStr === dateKey(today) ? ' is-today' : '');
+      tab.textContent = dayNameOf(d).slice(0, 3);
+      tab.addEventListener('click', function () { drawerDayKey = dKeyStr; renderApp(); });
+      tabs.appendChild(tab);
+    });
+    panel.appendChild(tabs);
+
+    var selDate = weekDates.filter(function (d) { return dateKey(d) === drawerDayKey; })[0] || today;
+    var selDayName = dayNameOf(selDate);
+    var selDKey = dateKey(selDate);
+
+    var timeline = document.createElement('div');
+    timeline.className = 'drawer-timeline';
+    TIME_BLOCKS[selDayName].forEach(function (block, blockIndex) {
+      var start = block[0], end = block[1], label = block[2], cat = block[3];
+      var row = document.createElement('div');
+      row.className = 'timeline-block cat-' + cat;
+      row.innerHTML =
+        '<div class="timeline-time">' + fmtTime(start) + ' – ' + fmtTime(end) + '</div>' +
+        '<div class="timeline-label"></div>';
+      row.querySelector('.timeline-label').textContent = label;
+
+      if (isFillableBlock(cat)) {
+        var plans = customPlansFor(selDKey, blockIndex);
+        if (plans.length) {
+          var planList = document.createElement('div');
+          planList.className = 'timeline-plans';
+          plans.forEach(function (p) {
+            var chip = document.createElement('span');
+            chip.className = 'plan-chip';
+            chip.innerHTML = '<span class="plan-chip-label"></span><button type="button" class="plan-chip-remove" aria-label="Remove">✕</button>';
+            chip.querySelector('.plan-chip-label').textContent = p.label;
+            chip.querySelector('.plan-chip-remove').addEventListener('click', function () {
+              removeCustomPlan(selDKey, blockIndex, p.id);
+              persistAndRender();
+            });
+            planList.appendChild(chip);
+          });
+          row.appendChild(planList);
+        }
+
+        var formKey = selDKey + '|' + blockIndex;
+        if (planFormBlock === formKey) {
+          var form = document.createElement('div');
+          form.className = 'plan-add-form';
+          form.innerHTML = '<input type="text" class="plan-input" placeholder="What will he do?" maxlength="60"><button type="button" class="plan-save">Add</button>';
+          var input = form.querySelector('.plan-input');
+          form.querySelector('.plan-save').addEventListener('click', function () {
+            var label = input.value.trim();
+            if (!label) { input.focus(); return; }
+            addCustomPlan(selDKey, blockIndex, label);
+            planFormBlock = null;
+            persistAndRender();
+          });
+          row.appendChild(form);
+        } else {
+          var addBtn = document.createElement('button');
+          addBtn.type = 'button';
+          addBtn.className = 'plan-add-btn';
+          addBtn.textContent = '+ Add his own plan';
+          addBtn.addEventListener('click', function () { planFormBlock = formKey; renderApp(); });
+          row.appendChild(addBtn);
+        }
+      }
+
+      timeline.appendChild(row);
+    });
+    panel.appendChild(timeline);
+
+    app.appendChild(panel);
   }
 
   function renderApp() {
@@ -301,6 +656,8 @@
       app.appendChild(loadMsg);
       return;
     }
+
+    renderDrawer(app);
 
     var masthead = document.createElement('div');
     masthead.className = 'masthead';
@@ -348,6 +705,22 @@
       '<div class="card-head"><h2>Today</h2><span class="points-pill">' + todayPoints + ' / ' + todayPossible + ' pts</span></div>' +
       '<p class="sub">' + todaySub + '</p>' +
       '<div class="msg">' + (lastMessage || '') + '</div>';
+
+    // Reminder: items with no fixed time and no time picked yet, still not done —
+    // called out up top so they don't get lost until they're either timed or done.
+    var untimed = todayItems.filter(function (it) {
+      var k = todayKey + '|' + it.id;
+      return !isDone(k) && !timeInfoFor(todayName, todayKey, it.id);
+    });
+    if (untimed.length) {
+      var reminder = document.createElement('div');
+      reminder.className = 'time-reminder';
+      reminder.innerHTML = '<span class="time-reminder-mark">⏰ Finish before play time or bedtime</span>' +
+        '<span class="time-reminder-list"></span>';
+      reminder.querySelector('.time-reminder-list').textContent = untimed.map(function (it) { return it.label; }).join(' · ');
+      todayCard.appendChild(reminder);
+    }
+
     var todayList = document.createElement('div');
     renderItemGroup(todayList, today, todayItems, true);
     todayCard.appendChild(todayList);
@@ -591,7 +964,7 @@
   function loadState() {
     return supabaseClient
       .from('mission_log')
-      .select('completions, rewards')
+      .select('completions, rewards, extras')
       .eq('id', ROW_ID)
       .single()
       .then(function (res) {
@@ -600,7 +973,8 @@
           completions: normalizeCompletions(res.data.completions),
           rewards: (res.data.rewards && typeof res.data.rewards === 'object')
             ? { balance: res.data.rewards.balance || 0, ledger: res.data.rewards.ledger || [] }
-            : { balance: 2500, ledger: [] }
+            : { balance: 2500, ledger: [] },
+          extras: normalizeExtras(res.data.extras)
         };
         stateLoaded = true;
         renderApp();
@@ -624,7 +998,8 @@
             completions: normalizeCompletions(row.completions),
             rewards: (row.rewards && typeof row.rewards === 'object')
               ? { balance: row.rewards.balance || 0, ledger: row.rewards.ledger || [] }
-              : STATE.rewards
+              : STATE.rewards,
+            extras: (row.extras && typeof row.extras === 'object') ? normalizeExtras(row.extras) : STATE.extras
           };
           renderApp();
         })
@@ -643,7 +1018,7 @@
     applyingRemote = true;
     supabaseClient
       .from('mission_log')
-      .update({ completions: STATE.completions, rewards: STATE.rewards, updated_at: new Date().toISOString() })
+      .update({ completions: STATE.completions, rewards: STATE.rewards, extras: STATE.extras, updated_at: new Date().toISOString() })
       .eq('id', ROW_ID)
       .then(function (res) {
         if (res.error) console.error('Save failed:', res.error);

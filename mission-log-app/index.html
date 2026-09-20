@@ -31,6 +31,12 @@
     --cat-arts-wash: #fdece3;
     --cat-sleep:     #b8860a;
     --cat-sleep-wash:#fbf0da;
+    --cat-school:    #6a4fc2;
+    --cat-school-wash:#efe9fb;
+    --cat-meal:      #d19a2c;
+    --cat-meal-wash: #faf1de;
+    --cat-fillable:  #4a5568;
+    --cat-fillable-wash:#eef1f5;
 
     --good:          #0ca30c;
     --good-wash:     #e6f6e6;
@@ -58,7 +64,7 @@
     min-height: 100vh;
   }
 
-  .page { max-width: 760px; margin: 0 auto; }
+  .page { max-width: 760px; margin: 0 auto; padding-top: 54px; position: relative; }
 
   .masthead {
     display: flex; justify-content: space-between; align-items: flex-end;
@@ -128,14 +134,20 @@
   }
 
   .item-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 10px; cursor: pointer;
-    border: 1px solid transparent; border-top: 1px solid var(--border); background: none;
-    width: 100%; text-align: left; font: inherit; color: inherit;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+    padding: 6px 10px; border-top: 1px solid var(--border);
   }
-  .item-row:hover { background: var(--surface-sunk); }
-  .item-row:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
   .item-row:first-child { border-top: none; }
+
+  .item-toggle {
+    display: flex; align-items: center; gap: 12px; flex: 1 0 auto; max-width: 100%;
+    padding: 5px 4px; margin: 0 -4px; cursor: pointer;
+    border: 1px solid transparent; border-radius: 8px; background: none;
+    text-align: left; font: inherit; color: inherit;
+  }
+  .item-toggle:hover { background: var(--surface-sunk); }
+  .item-toggle:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
+  .item-toggle[disabled] { cursor: default; }
 
   .box {
     width: 22px; height: 22px; border-radius: 6px; flex: none;
@@ -147,8 +159,17 @@
   .item-row.done .box svg { display: block; }
   .box svg path { stroke: white; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .item-row.pending .box { border-color: var(--hero-gold); border-style: dashed; }
-  .item-row.pending { cursor: pointer; }
-  .item-row[disabled] { cursor: default; }
+
+  /* Parent Review rows are plain <button class="item-row review-row"> elements
+     (no .item-toggle wrapper), so they need their own button-reset + interactive
+     styling rather than sharing .item-toggle's. */
+  .review-row {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 10px 10px; margin: 0; text-align: left; font: inherit; color: inherit;
+    background: none; border: none; cursor: pointer; border-radius: 6px;
+  }
+  .review-row:hover { background: var(--surface-sunk); }
+  .review-row:focus-visible { outline: 2px solid var(--cat-stem); outline-offset: 1px; }
 
   .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
   .dot.cat-stem { background: var(--cat-stem); }
@@ -278,7 +299,149 @@
   .load-state.is-error { color: #ffd7d7; }
 
   footer { margin-top: 24px; font-size: 11.5px; color: var(--on-hero-dim); line-height: 1.6; text-align: center; }
-  </style>
+
+  /* ---- time chip / picker on each item row ---- */
+  .time-chip {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 600;
+    color: var(--ink-secondary); background: var(--surface-sunk); border: 1px solid transparent;
+    padding: 4px 9px; border-radius: 999px; font-variant-numeric: tabular-nums;
+  }
+  .time-chip-editable {
+    cursor: pointer; color: var(--hero-navy); border: 1px dashed var(--border-strong);
+  }
+  .time-chip-editable:hover { background: var(--cat-stem-wash); border-color: var(--cat-stem); }
+  .time-set-btn {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.02em; color: var(--ink-muted); background: none;
+    border: 1px dashed var(--border-strong); padding: 4px 9px; border-radius: 999px; cursor: pointer;
+  }
+  .time-set-btn:hover { color: var(--hero-navy); border-color: var(--hero-navy); background: var(--surface-sunk); }
+  .time-edit-form { flex: none; display: flex; align-items: center; gap: 6px; }
+  .time-input {
+    font: inherit; font-size: 12.5px; padding: 4px 6px; border: 1px solid var(--border-strong);
+    border-radius: 6px; color: var(--ink);
+  }
+  .time-save {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: #ffffff;
+    background: var(--good); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer;
+  }
+
+  /* ---- "finish before free time" reminder banner ---- */
+  .time-reminder {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+    background: var(--hero-gold-wash); border: 1.5px solid var(--hero-gold);
+  }
+  .time-reminder-mark {
+    display: block; font-weight: 700; font-size: 13px; color: var(--hero-navy);
+  }
+  .time-reminder-list {
+    display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-secondary);
+  }
+
+  /* ---- hamburger button (always visible, opens the full-day drawer) ---- */
+  .hamburger-btn {
+    position: fixed; top: 16px; left: 16px; z-index: 40;
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--hero-gold); border: 2.5px solid var(--hero-navy);
+    box-shadow: 3px 3px 0 rgba(11,31,77,0.5);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    cursor: pointer; padding: 0;
+  }
+  .hamburger-btn span {
+    display: block; width: 20px; height: 3px; border-radius: 2px; background: var(--hero-navy);
+  }
+  .hamburger-btn:hover { background: #ffd569; }
+
+  /* ---- full-day plan drawer ---- */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(11,31,77,0.55); z-index: 50;
+    animation: drawer-fade 0.15s ease;
+  }
+  .drawer-panel {
+    position: fixed; top: 0; left: 0; bottom: 0; width: min(330px, 88vw); z-index: 51;
+    background: var(--surface); color: var(--ink); overflow-y: auto;
+    box-shadow: 6px 0 0 rgba(11,31,77,0.35);
+    padding: 16px 14px 24px;
+    animation: drawer-slide 0.18s ease;
+  }
+  @keyframes drawer-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes drawer-slide { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 2px solid var(--hero-navy); margin-bottom: 12px;
+  }
+  .drawer-title {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; font-size: 19px; color: var(--hero-navy);
+  }
+  .drawer-close {
+    flex: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    background: var(--surface-sunk); border: 1.5px solid var(--border-strong); color: var(--ink);
+    font-size: 13px; line-height: 1;
+  }
+  .drawer-close:hover { background: var(--hero-gold-wash); border-color: var(--hero-gold); }
+
+  .drawer-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .drawer-tab {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--border-strong);
+    background: var(--surface); color: var(--ink-secondary); cursor: pointer;
+  }
+  .drawer-tab.is-today { border-color: var(--cat-stem); color: var(--cat-stem); }
+  .drawer-tab.is-active { background: var(--hero-navy); border-color: var(--hero-navy); color: #ffffff; }
+
+  .drawer-timeline { display: flex; flex-direction: column; gap: 8px; }
+  .timeline-block {
+    border-radius: 8px; padding: 9px 10px; background: var(--surface-sunk);
+    border-left: 5px solid var(--ink-muted);
+  }
+  .timeline-block.cat-stem   { border-left-color: var(--cat-stem);   background: var(--cat-stem-wash); }
+  .timeline-block.cat-sport  { border-left-color: var(--cat-sport);  background: var(--cat-sport-wash); }
+  .timeline-block.cat-arts   { border-left-color: var(--cat-arts);   background: var(--cat-arts-wash); }
+  .timeline-block.cat-sleep  { border-left-color: var(--cat-sleep);  background: var(--cat-sleep-wash); }
+  .timeline-block.cat-school { border-left-color: var(--cat-school); background: var(--cat-school-wash); }
+  .timeline-block.cat-meal   { border-left-color: var(--cat-meal);   background: var(--cat-meal-wash); }
+  .timeline-block.cat-open,
+  .timeline-block.cat-pickyour,
+  .timeline-block.cat-build {
+    border-left-style: dashed; border-left-color: var(--cat-fillable); background: var(--cat-fillable-wash);
+  }
+  .timeline-time {
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--ink-muted);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  }
+  .timeline-label { font-size: 13.5px; font-weight: 600; margin-top: 2px; }
+
+  .timeline-plans { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .plan-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--hero-navy);
+    background: var(--hero-gold-wash); border: 1px solid var(--hero-gold);
+    padding: 4px 6px 4px 10px; border-radius: 999px;
+  }
+  .plan-chip-remove {
+    flex: none; width: 16px; height: 16px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(11,31,77,0.12); color: var(--hero-navy); font-size: 9px; line-height: 1; padding: 0;
+  }
+  .plan-chip-remove:hover { background: var(--hero-red); color: #ffffff; }
+
+  .plan-add-btn {
+    margin-top: 8px; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    color: var(--cat-fillable); background: none; border: 1.5px dashed var(--cat-fillable);
+    padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .plan-add-btn:hover { background: #ffffff; }
+  .plan-add-form { margin-top: 8px; display: flex; gap: 6px; }
+  .plan-input {
+    flex: 1; min-width: 0; font: inherit; font-size: 12.5px; padding: 6px 9px;
+    border: 1px solid var(--border-strong); border-radius: 8px; color: var(--ink);
+  }
+  .plan-save {
+    flex: none; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; color: #ffffff;
+    background: var(--good); border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+</style>
 </head>
 <body>
 <div class="page" id="app">
