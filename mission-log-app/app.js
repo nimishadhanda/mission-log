@@ -7,6 +7,41 @@
     supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
   }
 
+  // ---------------- view-only mode + parent PIN lock ----------------
+  // A link with ?view=1 (e.g. shared with Dad/grandparents) renders everything
+  // read-only: no checking items off, no approving, no adding plans or times.
+  // This is a simple deterrent, not real security — the PIN lives in config.js,
+  // which is public in the page source, same trust model as the Supabase anon key.
+  var VIEW_ONLY = false;
+  try { VIEW_ONLY = new URLSearchParams(window.location.search).get('view') === '1'; }
+  catch (e) { VIEW_ONLY = false; }
+
+  var PARENT_PIN = (window.PARENT_PIN || '').toString();
+  var parentUnlocked = false;
+  try { parentUnlocked = window.localStorage.getItem('missionLogParentUnlocked') === '1'; }
+  catch (e) { parentUnlocked = false; }
+  function isParentUnlocked() { return parentUnlocked; }
+  function setParentUnlocked(v) {
+    parentUnlocked = v;
+    try {
+      if (v) window.localStorage.setItem('missionLogParentUnlocked', '1');
+      else window.localStorage.removeItem('missionLogParentUnlocked');
+    } catch (e) { /* private browsing or storage blocked — unlock still works for this load */ }
+  }
+  // Any parent-only action (approve, undo an approval, add/spend rewards) routes
+  // through here — if already unlocked it just runs; otherwise it opens the PIN
+  // prompt and re-runs itself automatically once the PIN checks out.
+  var pinPromptOpen = false;
+  var pinPromptError = false;
+  var pinPendingAction = null;
+  function requireParentUnlock(action) {
+    if (isParentUnlocked()) { action(); return; }
+    pinPendingAction = action;
+    pinPromptOpen = true;
+    pinPromptError = false;
+    renderApp();
+  }
+
   // ---------------- data ----------------
   var MISSION_WEEK_URL = 'https://claude.ai/code/artifact/0f7e17bc-3ce4-4d29-a550-ab88212fbffb';
   var DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -415,6 +450,7 @@
   function fmtTime24to12(hhmm) { return fmtTime(hhmm); }
 
   function renderItemRow(d, item, allowToggle) {
+    allowToggle = allowToggle && !VIEW_ONLY;
     var dName = dayNameOf(d);
     var dKeyStr = dateKey(d);
     var key = dKeyStr + '|' + item.id;
@@ -433,11 +469,17 @@
       '<span class="item-label"></span>';
     toggle.querySelector('.item-label').textContent = item.label;
     if (done) {
-      toggle.addEventListener('click', function () {
-        unapproveItem(key);
-        setFlash('Approval undone — back to waiting for Mom.');
-        persistAndRender();
-      });
+      if (VIEW_ONLY) {
+        toggle.disabled = true;
+      } else {
+        toggle.addEventListener('click', function () {
+          requireParentUnlock(function () {
+            unapproveItem(key);
+            setFlash('Approval undone — back to waiting for Mom.');
+            persistAndRender();
+          });
+        });
+      }
     } else if (allowToggle) {
       toggle.addEventListener('click', function () {
         if (submitted) {
@@ -469,11 +511,12 @@
       });
       row.appendChild(form);
     } else if (info) {
-      var chip = document.createElement(info.editable ? 'button' : 'span');
-      chip.type = info.editable ? 'button' : undefined;
-      chip.className = 'time-chip' + (info.editable ? ' time-chip-editable' : '');
+      var editable = info.editable && !VIEW_ONLY;
+      var chip = document.createElement(editable ? 'button' : 'span');
+      chip.type = editable ? 'button' : undefined;
+      chip.className = 'time-chip' + (editable ? ' time-chip-editable' : '');
       chip.textContent = info.label;
-      if (info.editable) {
+      if (editable) {
         chip.title = 'Tap to change the time';
         chip.addEventListener('click', function () { timeEditorKey = key; renderApp(); });
       }
@@ -496,7 +539,7 @@
     if (done) {
       var db = document.createElement('span');
       db.className = 'done-badge';
-      db.textContent = 'Tap to undo';
+      db.textContent = VIEW_ONLY ? 'Done' : 'Tap to undo';
       row.appendChild(db);
     }
     return row;
@@ -589,19 +632,24 @@
           plans.forEach(function (p) {
             var chip = document.createElement('span');
             chip.className = 'plan-chip';
-            chip.innerHTML = '<span class="plan-chip-label"></span><button type="button" class="plan-chip-remove" aria-label="Remove">✕</button>';
+            chip.innerHTML = '<span class="plan-chip-label"></span>' +
+              (VIEW_ONLY ? '' : '<button type="button" class="plan-chip-remove" aria-label="Remove">✕</button>');
             chip.querySelector('.plan-chip-label').textContent = p.label;
-            chip.querySelector('.plan-chip-remove').addEventListener('click', function () {
-              removeCustomPlan(selDKey, blockIndex, p.id);
-              persistAndRender();
-            });
+            if (!VIEW_ONLY) {
+              chip.querySelector('.plan-chip-remove').addEventListener('click', function () {
+                removeCustomPlan(selDKey, blockIndex, p.id);
+                persistAndRender();
+              });
+            }
             planList.appendChild(chip);
           });
           row.appendChild(planList);
         }
 
         var formKey = selDKey + '|' + blockIndex;
-        if (planFormBlock === formKey) {
+        if (VIEW_ONLY) {
+          // no add controls for viewers
+        } else if (planFormBlock === formKey) {
           var form = document.createElement('div');
           form.className = 'plan-add-form';
           form.innerHTML = '<input type="text" class="plan-input" placeholder="What will he do?" maxlength="60"><button type="button" class="plan-save">Add</button>';
@@ -631,6 +679,77 @@
     app.appendChild(panel);
   }
 
+  // The parent-only lock: a button (top-right) that opens a PIN prompt. Once
+  // unlocked, this device stays unlocked (saved in localStorage) until Mom taps
+  // it again to lock. Hidden entirely for view-only links.
+  function renderParentLock(app) {
+    if (VIEW_ONLY) return;
+
+    var lockBtn = document.createElement('button');
+    lockBtn.type = 'button';
+    lockBtn.className = 'lock-btn' + (isParentUnlocked() ? ' is-unlocked' : '');
+    lockBtn.setAttribute('aria-label', isParentUnlocked() ? 'Lock parent controls' : 'Unlock parent controls');
+    lockBtn.textContent = isParentUnlocked() ? '🔓' : '🔒';
+    lockBtn.addEventListener('click', function () {
+      if (isParentUnlocked()) {
+        setParentUnlocked(false);
+        renderApp();
+      } else {
+        pinPendingAction = null;
+        pinPromptOpen = true;
+        pinPromptError = false;
+        renderApp();
+      }
+    });
+    app.appendChild(lockBtn);
+
+    if (!pinPromptOpen) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'pin-overlay';
+    overlay.addEventListener('click', function () {
+      pinPromptOpen = false;
+      pinPendingAction = null;
+      renderApp();
+    });
+    app.appendChild(overlay);
+
+    var modal = document.createElement('div');
+    modal.className = 'pin-modal';
+    modal.innerHTML =
+      '<div class="pin-title">Parent PIN</div>' +
+      '<p class="pin-sub">Enter the PIN to approve missions or manage rewards.</p>' +
+      '<input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="pin-input" placeholder="••••">' +
+      (pinPromptError ? '<div class="pin-error">Wrong PIN — try again.</div>' : '') +
+      '<div class="pin-actions">' +
+        '<button type="button" class="pin-unlock">Unlock</button>' +
+        '<button type="button" class="pin-cancel">Cancel</button>' +
+      '</div>';
+    var pinInput = modal.querySelector('.pin-input');
+    function tryUnlock() {
+      if (PARENT_PIN && pinInput.value === PARENT_PIN) {
+        setParentUnlocked(true);
+        pinPromptOpen = false;
+        pinPromptError = false;
+        var action = pinPendingAction;
+        pinPendingAction = null;
+        if (action) action(); else renderApp();
+      } else {
+        pinPromptError = true;
+        renderApp();
+      }
+    }
+    modal.querySelector('.pin-unlock').addEventListener('click', tryUnlock);
+    modal.querySelector('.pin-cancel').addEventListener('click', function () {
+      pinPromptOpen = false;
+      pinPendingAction = null;
+      renderApp();
+    });
+    pinInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+    app.appendChild(modal);
+    pinInput.focus();
+  }
+
   function renderApp() {
     var app = document.getElementById('app');
     app.innerHTML = '';
@@ -658,6 +777,14 @@
     }
 
     renderDrawer(app);
+    renderParentLock(app);
+
+    if (VIEW_ONLY) {
+      var viewBadge = document.createElement('div');
+      viewBadge.className = 'view-badge';
+      viewBadge.textContent = '👀 Viewing only';
+      app.appendChild(viewBadge);
+    }
 
     var masthead = document.createElement('div');
     masthead.className = 'masthead';
@@ -750,18 +877,22 @@
     } else {
       var rList = document.createElement('div');
       pendingReview.forEach(function (p) {
-        var row = document.createElement('button');
-        row.type = 'button';
+        var row = document.createElement(VIEW_ONLY ? 'div' : 'button');
+        if (!VIEW_ONLY) row.type = 'button';
         row.className = 'item-row review-row';
         row.innerHTML =
           '<span class="dot cat-' + p.item.cat + '"></span>' +
           '<span class="item-label"></span>' +
-          '<span class="approve-pill">Approve</span>';
+          '<span class="approve-pill">' + (VIEW_ONLY ? 'Pending' : 'Approve') + '</span>';
         row.querySelector('.item-label').textContent = p.item.label + ' — ' + p.d.toLocaleDateString(undefined, { weekday: 'short' });
-        row.addEventListener('click', function () {
-          approveItem(p.key);
-          persistAndRender();
-        });
+        if (!VIEW_ONLY) {
+          row.addEventListener('click', function () {
+            requireParentUnlock(function () {
+              approveItem(p.key);
+              persistAndRender();
+            });
+          });
+        }
         rList.appendChild(row);
       });
       reviewCard.appendChild(rList);
@@ -885,13 +1016,14 @@
       '<p class="sub">Bonus money for great behaviour, discipline, and sticking to the day plan.</p>' +
       '<div class="balance-row">' +
         '<div class="balance-amount">₹' + rewards.balance.toLocaleString('en-IN') + '</div>' +
+        (VIEW_ONLY ? '' :
         '<div class="balance-actions">' +
           '<button type="button" class="reward-btn reward-btn-add">+ Add</button>' +
           '<button type="button" class="reward-btn reward-btn-spend">− Spend</button>' +
-        '</div>' +
+        '</div>') +
       '</div>';
 
-    if (rewardFormOpen) {
+    if (rewardFormOpen && !VIEW_ONLY) {
       var rForm = document.createElement('div');
       rForm.className = 'reward-form';
       rForm.innerHTML =
@@ -919,14 +1051,20 @@
       });
     }
 
-    rewardsCard.querySelector('.reward-btn-add').addEventListener('click', function () {
-      rewardFormOpen = (rewardFormOpen === 'add') ? null : 'add';
-      renderApp();
-    });
-    rewardsCard.querySelector('.reward-btn-spend').addEventListener('click', function () {
-      rewardFormOpen = (rewardFormOpen === 'spend') ? null : 'spend';
-      renderApp();
-    });
+    if (!VIEW_ONLY) {
+      rewardsCard.querySelector('.reward-btn-add').addEventListener('click', function () {
+        requireParentUnlock(function () {
+          rewardFormOpen = (rewardFormOpen === 'add') ? null : 'add';
+          renderApp();
+        });
+      });
+      rewardsCard.querySelector('.reward-btn-spend').addEventListener('click', function () {
+        requireParentUnlock(function () {
+          rewardFormOpen = (rewardFormOpen === 'spend') ? null : 'spend';
+          renderApp();
+        });
+      });
+    }
 
     if (rewards.ledger.length) {
       var ledgerWrap = document.createElement('div');
@@ -953,7 +1091,9 @@
     app.appendChild(rewardsCard);
 
     var foot = document.createElement('footer');
-    foot.textContent = 'Checks off here save automatically. Mom gives the final OK in Parent Review.';
+    foot.textContent = VIEW_ONLY
+      ? 'You\'re viewing Moksh\'s progress — this link is read-only.'
+      : 'Checks off here save automatically. Mom gives the final OK in Parent Review.';
     app.appendChild(foot);
   }
 

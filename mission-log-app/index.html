@@ -352,6 +352,56 @@
   }
   .hamburger-btn:hover { background: #ffd569; }
 
+  /* ---- parent lock button (top-right) + PIN prompt ---- */
+  .lock-btn {
+    position: fixed; top: 16px; right: 16px; z-index: 40;
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface); border: 2.5px solid var(--hero-navy);
+    box-shadow: 3px 3px 0 rgba(11,31,77,0.5);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0; font-size: 19px; line-height: 1;
+  }
+  .lock-btn.is-unlocked { background: var(--good-wash); }
+  .lock-btn:hover { background: var(--surface-sunk); }
+
+  .pin-overlay {
+    position: fixed; inset: 0; background: rgba(11,31,77,0.55); z-index: 60;
+    animation: drawer-fade 0.15s ease;
+  }
+  .pin-modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 61;
+    width: min(300px, 86vw);
+    background: var(--surface); color: var(--ink); border-radius: 12px;
+    border: 2.5px solid var(--hero-navy); box-shadow: 5px 5px 0 rgba(11,31,77,0.5);
+    padding: 20px; text-align: center;
+  }
+  .pin-title {
+    font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase;
+    font-size: 19px; color: var(--hero-navy);
+  }
+  .pin-sub { font-size: 12.5px; color: var(--ink-secondary); margin: 6px 0 14px; }
+  .pin-input {
+    width: 100%; font: inherit; font-size: 20px; letter-spacing: 0.3em; text-align: center;
+    padding: 10px; border: 1.5px solid var(--border-strong); border-radius: 8px; color: var(--ink);
+  }
+  .pin-error { color: var(--hero-red); font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .pin-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .pin-unlock {
+    flex: 1; font-family: "JetBrains Mono", monospace; font-size: 12.5px; font-weight: 700; color: #ffffff;
+    background: var(--good); border: none; border-radius: 8px; padding: 10px; cursor: pointer;
+  }
+  .pin-cancel {
+    flex: 1; font-family: "JetBrains Mono", monospace; font-size: 12.5px; font-weight: 700; color: var(--ink-secondary);
+    background: none; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px; cursor: pointer;
+  }
+
+  /* ---- view-only badge (shown on shared read-only links) ---- */
+  .view-badge {
+    display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--hero-navy);
+    background: var(--hero-gold); padding: 4px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+
   /* ---- full-day plan drawer ---- */
   .drawer-overlay {
     position: fixed; inset: 0; background: rgba(11,31,77,0.55); z-index: 50;
